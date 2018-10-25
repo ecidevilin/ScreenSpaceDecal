@@ -77,7 +77,7 @@ Shader "Image Effects/ScreenSpaceDecal"
 #define BLEND_DECAL(n) \
 		{ \
 			float2 deltaPos = pos.xz - _DecalXZAndInvSize##n.xy; \
-			float2 duv = (deltaPos + float2(0.5,0.5)) * _DecalXZAndInvSize##n.zw; \
+			float2 duv = (deltaPos) / _DecalXZAndInvSize##n.zw + float2(0.5,0.5); \
 			if (duv.x > 0 && duv.y > 0 && duv.x < 1 && duv.y < 1) \
 			{ \
 				_DecalTex_ST.zw = _DecalOffset##n.xy; \
