@@ -1,3 +1,3 @@
 # ScreenSpaceDecal
 
-[Result](pic/SSD.png)
+![Result](pic/SSD.png)
