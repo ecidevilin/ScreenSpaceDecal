@@ -15,7 +15,7 @@ Shader "Image Effects/ScreenSpaceDecal"
 		_DecalXZAndInvSize2 ("_DecalXZAndInvSize2", vector) = (0,0,1,1)
 		_DecalOffset2 ("_DecalOffset2", vector) = (0,0,0,0)
 		_DecalTex ("_DecalTex", 2D) = "black" {}
-
+		[HideInInspector]
 		_MainTex ("Screen Blended", 2D) = "" {}
 	}
 
@@ -39,18 +39,19 @@ Shader "Image Effects/ScreenSpaceDecal"
 
 		struct v2f
 		{
+			float4 pos : SV_POSITION;
 			float2 uv : TEXCOORD0;
 
 		#if UNITY_UV_STARTS_AT_TOP
-				float2 uv2 : TEXCOORD1;
+			float2 uv2 : TEXCOORD1;
 		#endif
 		};	
 		
-		v2f vert ( appdata_img v , out float4 outpos : SV_POSITION)
+		v2f vert ( appdata_img v)
 		{
 			v2f o;
 			
-			outpos = UnityObjectToClipPos (v.vertex);
+			o.pos = UnityObjectToClipPos (v.vertex);
         	o.uv = v.texcoord;		
         	
 		#if UNITY_UV_STARTS_AT_TOP
@@ -73,7 +74,8 @@ Shader "Image Effects/ScreenSpaceDecal"
 			return pos.xyz / pos.w;
 		}
 
-#define BLEND_DECAL(n) { \
+#define BLEND_DECAL(n) \
+		{ \
 			float2 deltaPos = pos.xz - _DecalXZAndInvSize##n.xy; \
 			float2 duv = (deltaPos + float2(0.5,0.5)) * _DecalXZAndInvSize##n.zw; \
 			if (duv.x > 0 && duv.y > 0 && duv.x < 1 && duv.y < 1) \
@@ -83,9 +85,9 @@ Shader "Image Effects/ScreenSpaceDecal"
 				half4 dec = tex2D(_DecalTex, duv); \
 				col = lerp(col, dec, dec.a); \
 			} \
-}
+		}
 
-		fixed4 frag (v2f i, UNITY_VPOS_TYPE vpos : VPOS) : COLOR
+		fixed4 frag (v2f i) : COLOR
 		{
 		#if UNITY_UV_STARTS_AT_TOP
 			float depth = SAMPLE_DEPTH_TEXTURE(_CameraDepthTexture, i.uv2);
@@ -105,7 +107,6 @@ Shader "Image Effects/ScreenSpaceDecal"
 			BLEND_DECAL(0);
 			BLEND_DECAL(1);
 			BLEND_DECAL(2);
-
 			return col;
 		}
 
